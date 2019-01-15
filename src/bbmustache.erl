@@ -242,8 +242,9 @@ compile_impl([{'#', Keys, Tags, Source} | T], Map, Result, State) ->
         true ->
             compile_impl(T, Map, compile_impl(Tags, Value, Result, NestedState), State);
         _ when is_list(Value) ->
+            NewValue = list:join(<<", ">>, Value),
             compile_impl(T, Map, lists:foldl(fun(X, Acc) -> compile_impl(Tags, X, Acc, NestedState) end,
-                                             Result, Value), State);
+                                             Result, NewValue), State);
         _ when Value =:= false ->
             compile_impl(T, Map, Result, State);
         _ when is_function(Value, 2) ->
