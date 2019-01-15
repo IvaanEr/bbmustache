@@ -232,8 +232,8 @@ compile_impl([], _, Result, _) ->
 compile_impl([{n, Keys} | T], Map, Result, State) ->
     IOData = to_iodata(get_data_recursive(Keys, Map, <<>>, State)),
     Value = case is_list(IOData) of
-        true -> iolist_to_binary(lists:join(<<", ">>, IOData));
-        false ->     iolist_to_binary(IOData)
+        true -> iolist_to_binary(replace_penultimate(lists:join(<<", ">>, IOData), <<" y ">>));
+        false -> iolist_to_binary(IOData)
     end,
     EscapeFun = proplists:get_value(escape_fun, State#?MODULE.options, fun escape/1),
     compile_impl(T, Map, ?ADD(EscapeFun(Value), Result), State);
@@ -667,3 +667,9 @@ check_data_type([])                               -> maybe;
 check_data_type([Tuple | _]) when is_tuple(Tuple) -> true;
 check_data_type(_)                                -> false.
 -endif.
+
+
+replace_penultimate(L, Value) when is_list(L) ->
+    L1 = lists:sublist(L, length(L)-2),
+    Last = lists:last(L),
+    [L1, Value, Last].
