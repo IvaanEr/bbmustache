@@ -230,7 +230,7 @@ compile(#?MODULE{data = Tags} = T, Data, Options) ->
 compile_impl([], _, Result, _) ->
     Result;
 compile_impl([{n, Keys} | T], Map, Result, State) ->
-    Value = iolist_to_binary(to_iodata(get_data_recursive(Keys, Map, <<>>, State))),
+    Value = iolist_to_binary(lists:join(<<", ">>, to_iodata(get_data_recursive(Keys, Map, <<>>, State)))),
     EscapeFun = proplists:get_value(escape_fun, State#?MODULE.options, fun escape/1),
     compile_impl(T, Map, ?ADD(EscapeFun(Value), Result), State);
 compile_impl([{'&', Keys} | T], Map, Result, State) ->
@@ -242,9 +242,8 @@ compile_impl([{'#', Keys, Tags, Source} | T], Map, Result, State) ->
         true ->
             compile_impl(T, Map, compile_impl(Tags, Value, Result, NestedState), State);
         _ when is_list(Value) ->
-            NewValue = list:join(<<", ">>, Value),
             compile_impl(T, Map, lists:foldl(fun(X, Acc) -> compile_impl(Tags, X, Acc, NestedState) end,
-                                             Result, NewValue), State);
+                                             Result, Value), State);
         _ when Value =:= false ->
             compile_impl(T, Map, Result, State);
         _ when is_function(Value, 2) ->
