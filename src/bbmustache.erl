@@ -670,6 +670,11 @@ check_data_type(_)                                -> false.
 
 
 replace_penultimate(L, Value) when is_list(L) ->
-    L1 = lists:sublist(L, length(L)-2),
-    Last = lists:last(L),
-    [L1, Value, Last].
+    case L of
+        [] -> [];
+        [X] -> [X];
+        _ ->
+            L1 = lists:sublist(L, length(L)-2),
+            Last = lists:last(L),
+            lists:append(L1, [Value, Last])
+    end.
